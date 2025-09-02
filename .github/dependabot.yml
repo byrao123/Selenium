@@ -1,0 +1,123 @@
+version: 2
+updates:
+  # Enable version updates for npm (JavaScript/Node.js)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "byrao123"
+    assignees:
+      - "byrao123"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+    target-branch: "main"
+    
+  # Enable version updates for pip (Python)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "byrao123"
+    assignees:
+      - "byrao123"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+    target-branch: "main"
+    
+  # Enable version updates for Maven (Java)
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "byrao123"
+    assignees:
+      - "byrao123"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+    target-branch: "main"
+    
+  # Enable version updates for Gradle (Java)
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "byrao123"
+    assignees:
+      - "byrao123"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+    target-branch: "main"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "byrao123"
+    assignees:
+      - "byrao123"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+      - "github-actions"
+    target-branch: "main"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "byrao123"
+    assignees:
+      - "byrao123"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+      - "docker"
+    target-branch: "main"

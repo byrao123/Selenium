@@ -1,0 +1,230 @@
+name: "Security Scan"
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+  schedule:
+    # Run weekly security scans
+    - cron: '0 0 * * 0'
+
+jobs:
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'python', 'java' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended,security-and-quality
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+      if: hashFiles('package.json') != ''
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+      if: hashFiles('requirements.txt') != '' || hashFiles('pyproject.toml') != ''
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+      if: hashFiles('pom.xml') != '' || hashFiles('build.gradle') != ''
+
+    - name: Install Node.js dependencies
+      run: npm ci
+      if: hashFiles('package.json') != ''
+      continue-on-error: true
+
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+      if: hashFiles('requirements.txt') != ''
+      continue-on-error: true
+
+    - name: Install Maven dependencies
+      run: mvn dependency:resolve
+      if: hashFiles('pom.xml') != ''
+      continue-on-error: true
+
+    - name: Run npm audit
+      run: npm audit --audit-level moderate
+      if: hashFiles('package.json') != ''
+      continue-on-error: true
+
+    - name: Run Python security check with pip-audit
+      run: |
+        pip install pip-audit
+        pip-audit
+      if: hashFiles('requirements.txt') != ''
+      continue-on-error: true
+
+    - name: Run OWASP Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'Selenium-Security-Scan'
+        path: '.'
+        format: 'ALL'
+        out: 'dependency-check-report'
+      continue-on-error: true
+
+    - name: Upload dependency check results
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-check-report
+        path: dependency-check-report/
+      if: always()
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for all branches
+
+    - name: TruffleHog OSS
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+  security-hardening:
+    name: Security Configuration Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check for security files
+      run: |
+        echo "Checking for security-related files..."
+        
+        # Check for security policy
+        if [ ! -f "SECURITY.md" ]; then
+          echo "❌ SECURITY.md file not found"
+          exit 1
+        else
+          echo "✅ SECURITY.md file found"
+        fi
+        
+        # Check for comprehensive .gitignore
+        if [ ! -f ".gitignore" ]; then
+          echo "❌ .gitignore file not found"
+          exit 1
+        else
+          echo "✅ .gitignore file found"
+          
+          # Check for common sensitive patterns in .gitignore
+          sensitive_patterns=("*.key" "*.pem" "*.env" "credentials" "secrets" "config.ini")
+          for pattern in "${sensitive_patterns[@]}"; do
+            if grep -q "$pattern" .gitignore; then
+              echo "✅ .gitignore includes pattern: $pattern"
+            else
+              echo "⚠️  .gitignore missing pattern: $pattern"
+            fi
+          done
+        fi
+
+    - name: Check for hardcoded credentials
+      run: |
+        echo "Scanning for potential hardcoded credentials..."
+        
+        # Common credential patterns
+        if grep -r -i --include="*.py" --include="*.js" --include="*.java" --include="*.json" --include="*.yaml" --include="*.yml" \
+          -E "(password|pwd|secret|key|token|api_key|apikey)\s*[:=]\s*['\"][^'\"]{8,}" . || true; then
+          echo "⚠️  Potential hardcoded credentials found - please review"
+        else
+          echo "✅ No obvious hardcoded credentials detected"
+        fi
+
+    - name: Validate file permissions
+      run: |
+        echo "Checking file permissions..."
+        find . -type f -executable -not -path "./.git/*" -not -name "*.sh" | head -10 | while read file; do
+          echo "⚠️  Executable file found: $file"
+        done || echo "✅ No unexpected executable files found"
+
+  selenium-security:
+    name: Selenium-Specific Security Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check Selenium security practices
+      run: |
+        echo "Checking Selenium-specific security practices..."
+        
+        # Check for secure WebDriver configurations
+        if find . -name "*.py" -o -name "*.js" -o -name "*.java" | xargs grep -l "webdriver\|WebDriver" > /dev/null 2>&1; then
+          echo "WebDriver usage detected, checking security configurations..."
+          
+          # Check for headless mode usage
+          if find . -name "*.py" -o -name "*.js" -o -name "*.java" | xargs grep -l "headless\|--headless" > /dev/null 2>&1; then
+            echo "✅ Headless mode configuration found"
+          else
+            echo "⚠️  Consider using headless mode for security"
+          fi
+          
+          # Check for no-sandbox option (should be used carefully)
+          if find . -name "*.py" -o -name "*.js" -o -name "*.java" | xargs grep -l "no-sandbox\|--no-sandbox" > /dev/null 2>&1; then
+            echo "⚠️  no-sandbox option found - ensure this is necessary"
+          fi
+          
+          # Check for secure browser options
+          secure_options=("disable-extensions" "disable-plugins" "disable-dev-shm-usage")
+          for option in "${secure_options[@]}"; do
+            if find . -name "*.py" -o -name "*.js" -o -name "*.java" | xargs grep -l "$option" > /dev/null 2>&1; then
+              echo "✅ Secure option found: $option"
+            else
+              echo "⚠️  Consider adding secure option: $option"
+            fi
+          done
+        else
+          echo "ℹ️  No WebDriver usage detected yet"
+        fi
