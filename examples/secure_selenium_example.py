@@ -208,7 +208,7 @@ def secure_login_example():
     
     # Create secure driver
     secure_driver = SecureWebDriver(browser='chrome', headless=True)
-    driver = secure_driver.create_driver()
+    secure_driver.create_driver()
     
     try:
         # Navigate to login page
