@@ -91,6 +91,7 @@ public class LoginPage extends BasePage {
      */
     public boolean isWelcomeMessageDisplayed() {
         return isElementDisplayed(welcomeMessage);
+        return isElementDisplayed(welcomeMessage);
     }
     
     /**
