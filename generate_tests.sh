@@ -2,10 +2,20 @@
 
 # Script to generate JUnit test cases for Java classes in src folder
 
-SRC_DIR="/home/runner/work/Selenium/Selenium/src/main/java"
-TEST_DIR="/home/runner/work/Selenium/Selenium/tests"
+# Set default values for directories
+SRC_DIR="${1:-$(pwd)/src/main/java}"
+TEST_DIR="${2:-$(pwd)/tests}"
+
+# Validate that source directory exists
+if [[ ! -d "$SRC_DIR" ]]; then
+    echo "Error: Source directory '$SRC_DIR' does not exist."
+    echo "Usage: $0 [SRC_DIR] [TEST_DIR]"
+    exit 1
+fi
 
 echo "Generating JUnit test cases for classes in src folder..."
+echo "Source directory: $SRC_DIR"
+echo "Test directory: $TEST_DIR"
 
 # Find all Java files in src directory
 find "$SRC_DIR" -name "*.java" -type f | while read -r java_file; do

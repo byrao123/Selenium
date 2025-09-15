@@ -2,11 +2,14 @@ package com.selenium;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.security.SecureRandom;
 
 /**
  * Utility class for common string and data operations
  */
 public class TestUtils {
+    
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     
     /**
      * Generate a random string of specified length
@@ -14,11 +17,18 @@ public class TestUtils {
      * @return A random string
      */
     public static String generateRandomString(int length) {
+        if (length < 0) {
+            throw new IllegalArgumentException("Length must be non-negative");
+        }
+        if (length == 0) {
+            return "";
+        }
+        
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder result = new StringBuilder();
         
         for (int i = 0; i < length; i++) {
-            int index = (int) (Math.random() * characters.length());
+            int index = SECURE_RANDOM.nextInt(characters.length());
             result.append(characters.charAt(index));
         }
         
@@ -45,7 +55,8 @@ public class TestUtils {
             return false;
         }
         
-        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        // Improved regex to prevent ReDoS attacks - more restrictive and linear time
+        return email.matches("^[A-Za-z0-9+_.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9][A-Za-z0-9.-]{0,61}[A-Za-z0-9]\\.[A-Za-z]{2,6}$");
     }
     
     /**
@@ -88,7 +99,10 @@ public class TestUtils {
      * @return Capitalized text
      */
     public static String capitalizeWords(String text) {
-        if (text == null || text.isEmpty()) {
+        if (text == null) {
+            return null;
+        }
+        if (text.isEmpty()) {
             return text;
         }
         
