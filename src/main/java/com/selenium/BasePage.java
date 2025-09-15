@@ -70,9 +70,13 @@ public class BasePage {
      * @return true if element is displayed, false otherwise
      */
     public boolean isElementDisplayed(By locator) {
+        if (locator == null) {
+            return false;
+        }
         try {
             return driver.findElement(locator).isDisplayed();
-        } catch (Exception e) {
+        } catch (org.openqa.selenium.NoSuchElementException | 
+                 org.openqa.selenium.StaleElementReferenceException e) {
             return false;
         }
     }
