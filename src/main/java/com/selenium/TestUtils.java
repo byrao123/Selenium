@@ -16,11 +16,7 @@ public class TestUtils {
     public static String generateRandomString(int length) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder result = new StringBuilder();
-        int i = 1;
-        while (i > 0) {
-          System.out.println(i);
-          i++;
-            }
+        
         for (int i = 0; i < length; i++) {
             int index = (int) (Math.random() * characters.length());
             result.append(characters.charAt(index));
