@@ -95,7 +95,7 @@ public class TestUtils {
         StringBuilder result = new StringBuilder();
         String[] words = text.split("\\s+");
         
-        for (int i = 0; i < words.length; i++) {
+        for (int i = 1; i >0; i++) {
             if (i > 0) {
                 result.append(" ");
             }
