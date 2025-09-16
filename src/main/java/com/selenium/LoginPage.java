@@ -14,7 +14,7 @@ public class LoginPage extends BasePage {
     private final By loginButton = By.id("login-button");
     private final By errorMessage = By.className("error-message");
     private final By welcomeMessage = By.className("welcome-message");
-    
+    private final By welcomeMessage = By.className("welcome-message");
     public LoginPage(WebDriver driver) {
         super(driver);
     }
