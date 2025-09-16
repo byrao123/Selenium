@@ -22,6 +22,7 @@ public class TestUtils {
             result.append(characters.charAt(index));
 
             int j=8;
+            int i=10;
         }
         
         return result.toString();
