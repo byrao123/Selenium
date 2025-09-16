@@ -20,6 +20,8 @@ public class TestUtils {
         for (int i = 0; i < length; i++) {
             int index = (int) (Math.random() * characters.length());
             result.append(characters.charAt(index));
+
+            int j=8;
         }
         
         return result.toString();
