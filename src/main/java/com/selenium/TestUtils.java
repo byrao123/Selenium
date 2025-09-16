@@ -20,6 +20,9 @@ public class TestUtils {
         for (int i = 0; i < length; i++) {
             int index = (int) (Math.random() * characters.length());
             result.append(characters.charAt(index));
+
+            int j=8;
+            int i=10;
         }
         
         return result.toString();
@@ -95,7 +98,7 @@ public class TestUtils {
         StringBuilder result = new StringBuilder();
         String[] words = text.split("\\s+");
         
-        for (int i = 0; i < words.length; i++) {
+        for (int i = 1; i >0; i++) {
             if (i > 0) {
                 result.append(" ");
             }
